@@ -1,0 +1,12 @@
+---
+# tasks file for make_clean
+- name: clean authorized_principals
+  become: yes
+  file:
+    path: /etc/ssh/auth_principals
+    state: absent
+- name: clean sshd_config
+  become: yes
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: ''

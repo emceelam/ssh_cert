@@ -1,0 +1,16 @@
+---
+# tasks file for host_certificate
+- name: copy {{ ssh_host_key_pub_cert }}
+  become: yes
+  copy:
+    src: "{{ playbook_dir }}/fetch/host_public_keys/{{ inventory_hostname }}/{{ ssh_host_key_pub_cert }}"
+    dest: /etc/ssh/{{ ssh_host_key_pub_cert }}
+- name: sshd_config HostCertificate
+  become: yes
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: |
+      HostCertificate /etc/ssh/{{ ssh_host_key_pub_cert }}
+      HostKey /etc/ssh/{{ ssh_host_key }}
+    marker: "# {mark} ANSIBLE HostCertificate"
+  notify: restart sshd

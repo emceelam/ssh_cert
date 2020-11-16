@@ -1,0 +1,21 @@
+---
+# tasks file for authorized_principals
+- name: mkdir /etc/ssh/auth_principals
+  become: yes
+  file:
+    path: /etc/ssh/auth_principals
+    state: directory
+
+- name: sshd_config AuthorizedPrincipalsFile
+  become: yes
+  blockinfile:
+    block: |
+      AuthorizedPrincipalsFile /etc/ssh/auth_principals/%u
+    path: /etc/ssh/sshd_config
+    marker: "# {mark} ANSIBLE AuthorizedPrincipalsFile"
+  notify: restart sshd
+- name: template local_user_principals
+  become: yes
+  template:
+    src: templates/etc/ssh/auth_principals/local_user
+    dest: /etc/ssh/auth_principals/{{ local_user }}

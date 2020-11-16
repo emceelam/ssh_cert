@@ -1,0 +1,7 @@
+---
+# handlers file for ssh_ca_host
+- name: restart sshd
+  become: yes
+  service:
+    name: sshd
+    state: restarted

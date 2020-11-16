@@ -1,0 +1,70 @@
+---
+# tasks file for ssh_ca_host
+- name: ssh-keygen -t {{ ssh_key_type }} -f ~/.ssh/ca_host_key
+  openssh_keypair:
+    type: "{{ ssh_key_type }}"
+    path: "{{ ssh_dir }}/ca_host_key"
+    comment: ca_host_key
+- name: fetch ca public keys
+  fetch:
+    src: "{{ ssh_dir }}/ca_host_key.pub"
+    dest: "{{ playbook_dir }}/fetch/ssh_ca/"
+    flat: yes 
+- name: mkdir {{ raspberry_hosts }}
+  file:
+    path: "{{ keys_dir }}/{{ host }}"
+    state: directory
+  loop: "{{ raspberry_hosts }}"
+  loop_control:
+    loop_var: host
+- name: copy all raspberry {{ ssh_host_key_pub }}
+  copy:
+    src: "{{ playbook_dir }}/fetch/host_public_keys/{{ host }}/{{ ssh_host_key_pub }}"
+    dest: "{{ keys_dir }}/{{ host }}/{{ ssh_host_key_pub }}"
+  loop: "{{ raspberry_hosts }}"
+  loop_control:
+    loop_var: host
+- name: sign {{ ssh_host_key_pub }} with ca_host_keys
+  shell:
+    # -s Sign using the specified CA key.  
+    # -I Certificate identity. usually hostname for hosts, username for users
+    # -n One or more principals (user or host names) that will be valid for the cert.
+    #    Multiple principals may be comma separated
+    # -V not documented, validity interval
+    # -h Create host certificate, not a user certificate
+    cmd: |
+      ssh-keygen \
+        -s {{ ssh_dir }}/ca_host_key \
+        -I {{ host }} \
+        -n {{ host }},{{ host }}.example.com \
+        -V +1w \
+        -z {{ ansible_date_time.epoch }} \
+        -h \
+        {{ keys_dir }}/{{ host }}/{{ ssh_host_key_pub }}
+    #creates: /etc/ssh/{{ ssh_host_key_pub_cert }}
+  loop: "{{ raspberry_hosts }}"
+  loop_control:
+    loop_var: host
+
+- name: fetch {{ ssh_host_key_pub_cert }}
+  fetch:
+    src: "{{ keys_dir }}/{{ host }}/{{ ssh_host_key_pub_cert }}"
+    dest: "{{ playbook_dir }}/fetch/host_public_keys/{{ host }}/{{ ssh_host_key_pub_cert }}"
+    flat: yes
+  loop: "{{ raspberry_hosts }}"
+  loop_control:
+    loop_var: host
+
+- name: slurp ca_host_key.pub 
+  slurp:
+    src: "{{ ssh_dir }}/ca_host_key.pub"
+  register: slurp_ca_host_key_pub
+- name: add ca_host_key to ~/.ssh/known_hosts
+  blockinfile:
+    block: |
+      # Replace '*' with '*.example.com' or your domain name
+      # Do not forget to connect to your private DNS server for your domain name
+      @cert-authority * {{ slurp_ca_host_key_pub['content'] | b64decode | trim }}
+    path: "{{ local_home }}/.ssh/known_hosts"
+    create: yes
+  delegate_to: localhost

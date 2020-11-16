@@ -1,0 +1,67 @@
+---
+# tasks file for ssh_ca_user
+- name: ssh-keygen -t {{ ssh_type }} -f ~/.ssh/{{ user_key }}
+  openssh_keypair:
+    path: "{{ local_home }}/.ssh/{{ user_key }}"
+    type: "{{ ssh_key_type }}"
+  delegate_to: localhost
+
+- name: mkdir 
+  file:
+    path: "{{ dir }}"
+    state: directory
+  loop: 
+    - "{{ ssh_dir }}"
+    - "{{ keys_dir }}"
+  loop_control:
+    loop_var: dir
+
+- name: ssh-keygen -t rsa -f ~/.ssh/ca_user_key
+  openssh_keypair:
+    path: "{{ ssh_dir }}/ca_user_key"
+    comment: ca_user_key
+- name: fetch ca public keys
+  fetch:
+    src: "{{ ssh_dir }}/{{ pub_key_file }}"
+    dest: "{{ playbook_dir }}/fetch/ssh_ca/"
+    flat: yes 
+  loop:
+    - ca_user_key.pub
+  loop_control:
+    loop_var: pub_key_file
+
+- name: copy my user public key to remote server
+  copy:
+    src: "{{ local_home }}/.ssh/{{ user_key_pub }}"
+    dest: "{{ keys_dir }}/{{ local_user }}/{{ user_key_pub }}"
+- name: sign the user's public key
+  shell:
+    cmd: |
+      ssh-keygen \
+        -s {{ ssh_dir }}/ca_user_key \
+        -I {{ local_user }} \
+        -n {{ local_user }} \
+        -V +1w \
+        -z {{ ansible_date_time.epoch }} \
+        {{ keys_dir }}/{{ local_user }}/{{ user_key_pub }}
+
+- name: fetch signed user public key
+  fetch:
+    src: "{{ keys_dir }}/{{ local_user }}/{{ user_key_pub_cert }}"
+    dest: "{{ local_home }}/.ssh/"
+    flat: yes
+
+#- name: slurp ca_user_key
+  #slurp:
+    #src: "{{ ssh_dir }}/ca_user_key.pub"
+  #register: slurped
+#- name: get slurped content
+  #set_fact:
+    #ca_user_key_content: "{{ slurped['content'] | b64decode | trim }}"
+#- name: trust ca_user_key
+  #become: yes
+  #blockinfile:
+    #block: |
+      #@cert-authority principals="{{ local_user }},rasputin,root,zone-webservers" *.example.com {{ ca_user_key_content }}
+    #path: "/home/{{ local_user }}/.ssh/authorized_keys"
+    #create: yes

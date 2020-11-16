@@ -1,2 +1,4 @@
-# ssh_cert
-Ansible playbook of ssh cert mutual authentication on three aspberry pi
+# Ansible SSH Certificate
+
+Ansible playbook of SSH certificate mutual authentication on three Raspberry Pi.
+
