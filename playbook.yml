@@ -1,5 +1,5 @@
 ---
-- hosts: raspberry_wifis
+- hosts: deployment_hosts
   gather_facts: False
   tasks:
     #- name: role make_clean
@@ -19,7 +19,7 @@
       loop:
         - ssh_ca_user
         - ssh_ca_host
-- hosts: raspberry_wifis
+- hosts: deployment_hosts
   gather_facts: False
   tasks:
     - name: various roles
