@@ -20,13 +20,3 @@
       Protocol 2    # SSH-2 only, https://access.redhat.com/articles/3022681
     marker: "# {mark} ANSIBLE TrustedUserCAKeys"
   notify: restart sshd
-- name: test the login with unix noop ':'
-  shell:
-    cmd: |
-      ssh \
-        -o BatchMode=yes \
-        -o IdentitiesOnly=yes \
-        {{ local_user }}@{{ inventory_hostname }} \
-        :
-  changed_when: false
-  delegate_to: localhost

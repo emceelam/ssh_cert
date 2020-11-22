@@ -1,4 +1,11 @@
 ---
+- hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: ssh-keygen -t {{ ssh_type }} -f ~/.ssh/{{ user_key }}
+      openssh_keypair:
+        path: "{{ local_home }}/.ssh/{{ user_key }}"
+        type: "{{ ssh_key_type }}"
 - hosts: deployment_hosts
   gather_facts: False
   tasks:
@@ -29,6 +36,20 @@
         - trust_user_ca_key
         - authorized_principals
         - host_certificate
+- hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: test the login with unix noop ':'
+      shell:
+        cmd: |
+          ssh \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            {{ local_user }}@{{ host }} \
+            :
+      changed_when: false
+      loop: "{{ groups['deployment_hosts'] }}"
+      loop_control:
+        loop_var: host
 
-  
 
