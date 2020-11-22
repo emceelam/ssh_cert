@@ -33,7 +33,7 @@
       include_role:
         name: "{{ item }}"
       loop:
-        - trust_user_ca_key
+        - trust_ca_user
         - authorized_principals
         - host_certificate
 - hosts: localhost

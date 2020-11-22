@@ -1,5 +1,5 @@
 ---
-# tasks file for trust_user_ca_key
+# tasks file for trust_ca_user
 - name: copy ssh_ca key 
   become: yes
   copy:

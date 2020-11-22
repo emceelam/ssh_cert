@@ -1,5 +1,5 @@
 ---
-# handlers file for trust_user_ca_key
+# handlers file for trust_ca_user
 - name: restart sshd
   become: yes
   service:
