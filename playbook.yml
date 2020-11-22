@@ -9,9 +9,6 @@
 - hosts: deployment_hosts
   gather_facts: False
   tasks:
-    #- name: role make_clean
-      #include_role:
-        #name: make_clean
     - name: fetch /etc/ssh/{{ ssh_host_key_pub }}
       fetch:
         src: /etc/ssh/{{ ssh_host_key_pub }}
