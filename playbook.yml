@@ -39,13 +39,9 @@
 - hosts: localhost
   gather_facts: False
   tasks:
-    - name: remove deployment_hosts from known_hosts
-      known_hosts:
-        name: "{{ host }}"
-        state: absent
-      loop: "{{ groups['deployment_hosts'] }}"
-      loop_control:
-        loop_var: host
+    - name: trust_ca_host
+      include_role:
+        name: trust_ca_host
     - name: test the login with unix noop ':'
       shell:
         cmd: |

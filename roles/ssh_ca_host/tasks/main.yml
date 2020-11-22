@@ -55,17 +55,3 @@
   loop_control:
     loop_var: host
 
-- name: "slurp {{ ca_host_key_pub }}"
-  slurp:
-    src: "{{ ssh_dir }}/{{ ca_host_key_pub }}"
-  register: slurp_ca_host_key_pub
-- name: add ca_host_key to ~/.ssh/known_hosts
-  blockinfile:
-    block: |
-      # Replace '*' with '*.example.com' or your domain name
-      # Do not forget to connect to your private DNS server for your domain name
-      @cert-authority * {{ slurp_ca_host_key_pub['content'] | b64decode | trim }}
-    marker: "# {mark} ANSIBLE ca_host_key.pub"
-    path: "{{ local_home }}/.ssh/known_hosts"
-    create: yes
-  delegate_to: localhost

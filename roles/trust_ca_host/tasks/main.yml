@@ -1,0 +1,26 @@
+---
+# tasks file for trust_ca_host
+
+- name: "slurp {{ ca_host_key_pub }}"
+  slurp:
+    src: "{{ playbook_dir }}/fetch/ssh_ca/{{ ca_host_key_pub }}"
+  register: slurp_ca_host_key_pub
+- name: add ca_host_key to ~/.ssh/known_hosts
+  blockinfile:
+    block: |
+      # Replace '*' with '*.example.com' or your domain name
+      # Do not forget to connect to your private DNS server for your domain name
+      @cert-authority * {{ slurp_ca_host_key_pub['content'] | b64decode | trim }}
+    marker: "# {mark} ANSIBLE ca_host_key.pub"
+    path: "{{ local_home }}/.ssh/known_hosts"
+    create: yes
+- name: debug deployment_hosts
+  debug:
+    msg: "{{ groups['deployment_hosts'] }}"
+- name: remove deployment_hosts from known_hosts
+  known_hosts:
+    name: "{{ host }}"
+    state: absent
+  loop: "{{ groups['deployment_hosts'] }}"
+  loop_control:
+    loop_var: host
