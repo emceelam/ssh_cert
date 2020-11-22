@@ -45,18 +45,3 @@
     src: "{{ keys_dir }}/{{ local_user }}/{{ user_key_pub_cert }}"
     dest: "{{ local_home }}/.ssh/"
     flat: yes
-
-#- name: slurp ca_user_key
-  #slurp:
-    #src: "{{ ssh_dir }}/ca_user_key.pub"
-  #register: slurped
-#- name: get slurped content
-  #set_fact:
-    #ca_user_key_content: "{{ slurped['content'] | b64decode | trim }}"
-#- name: trust ca_user_key
-  #become: yes
-  #blockinfile:
-    #block: |
-      #@cert-authority principals="{{ local_user }},rasputin,root,zone-webservers" *.example.com {{ ca_user_key_content }}
-    #path: "/home/{{ local_user }}/.ssh/authorized_keys"
-    #create: yes
