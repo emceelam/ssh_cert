@@ -1,13 +1,13 @@
 ---
 # tasks file for ssh_ca_host
-- name: "ssh-keygen -t {{ ssh_key_type }} -f ~/.ssh/ca_host_key"
+- name: "ssh-keygen -t {{ ssh_key_type }} -f ~/.ssh/{{ ca_host_key }}"
   openssh_keypair:
     type: "{{ ssh_key_type }}"
-    path: "{{ ssh_dir }}/ca_host_key"
-    comment: ca_host_key
+    path: "{{ ssh_dir }}/{{ ca_host_key }}"
+    comment: "{{ ca_host_key }}"
 - name: fetch ca public keys
   fetch:
-    src: "{{ ssh_dir }}/ca_host_key.pub"
+    src: "{{ ssh_dir }}/{{ ca_host_key_pub }}"
     dest: "{{ playbook_dir }}/fetch/ssh_ca/"
     flat: yes 
 - name: mkdir {{ keys_dir }}/host
@@ -34,7 +34,7 @@
     # -h Create host certificate, not a user certificate
     cmd: |
       ssh-keygen \
-        -s {{ ssh_dir }}/ca_host_key \
+        -s {{ ssh_dir }}/{{ ca_host_key }} \
         -I {{ host }} \
         -n {{ host }},{{ host }}.example.com \
         -V +1w \
@@ -55,9 +55,9 @@
   loop_control:
     loop_var: host
 
-- name: slurp ca_host_key.pub 
+- name: "slurp {{ ca_host_key_pub }}"
   slurp:
-    src: "{{ ssh_dir }}/ca_host_key.pub"
+    src: "{{ ssh_dir }}/{{ ca_host_key_pub }}"
   register: slurp_ca_host_key_pub
 - name: add ca_host_key to ~/.ssh/known_hosts
   blockinfile:

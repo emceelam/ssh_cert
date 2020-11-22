@@ -11,17 +11,18 @@
   loop_control:
     loop_var: dir
 
-- name: ssh-keygen -t rsa -f ~/.ssh/ca_user_key
+- name: ssh-keygen -t rsa -f ~/.ssh/{{ ca_user_key }}
   openssh_keypair:
-    path: "{{ ssh_dir }}/ca_user_key"
-    comment: ca_user_key
+    path: "{{ ssh_dir }}/{{ ca_user_key }}"
+    type: "{{ ssh_key_type }}"
+    comment: "{{ ca_user_key }}"
 - name: fetch ca public keys
   fetch:
     src: "{{ ssh_dir }}/{{ pub_key_file }}"
     dest: "{{ playbook_dir }}/fetch/ssh_ca/"
     flat: yes 
   loop:
-    - ca_user_key.pub
+    - "{{ ca_user_key_pub }}"
   loop_control:
     loop_var: pub_key_file
 
@@ -33,7 +34,7 @@
   shell:
     cmd: |
       ssh-keygen \
-        -s {{ ssh_dir }}/ca_user_key \
+        -s {{ ssh_dir }}/{{ ca_user_key }} \
         -I {{ local_user }} \
         -n {{ local_user }} \
         -V +1w \

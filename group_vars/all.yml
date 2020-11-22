@@ -16,5 +16,9 @@ ssh_host_key_pub_cert: ssh_host_{{ ssh_key_type }}_key-cert.pub
 user_key:          id_{{ ssh_key_type }}
 user_key_pub:      id_{{ ssh_key_type }}.pub
 user_key_pub_cert: id_{{ ssh_key_type }}-cert.pub
+ca_user_key:       ca_user_{{ ssh_key_type }}_key
+ca_user_key_pub:   ca_user_{{ ssh_key_type }}_key.pub
+ca_host_key:       ca_host_{{ ssh_key_type }}_key
+ca_host_key_pub:   ca_host_{{ ssh_key_type }}_key.pub
 ssh_dir: /home/{{ deployment_user }}/.ssh
 keys_dir: /home/{{ deployment_user }}/keys

@@ -3,14 +3,14 @@
 - name: copy ssh_ca key 
   become: yes
   copy:
-    src: "{{ playbook_dir }}/fetch/ssh_ca/ca_user_key.pub"
+    src: "{{ playbook_dir }}/fetch/ssh_ca/{{ ca_user_key_pub }}"
     dest: /etc/ssh/
-- name: trust ca_user_key.pub
+- name: trust {{ ca_user_key_pub }}
   become: yes
   blockinfile:
     path: /etc/ssh/sshd_config
     block: |
-      TrustedUserCAKeys /etc/ssh/ca_user_key.pub
+      TrustedUserCAKeys /etc/ssh/{{ ca_user_key_pub }}
       Protocol 2    # SSH-2 only, https://access.redhat.com/articles/3022681
     marker: "# {mark} ANSIBLE TrustedUserCAKeys"
   notify: restart sshd
